@@ -1,5 +1,5 @@
 const express = require('express');
-const Vibrant = require('node-vibrant');
+const { Vibrant } = require('node-vibrant/node');
 const app = express();
 app.use(express.json());
 app.post('/api/analyze', async (req, res) => {

@@ -2,6 +2,11 @@ const express = require('express');
 const { Vibrant } = require('node-vibrant/node');
 const app = express();
 app.use(express.json());
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
 app.post('/api/analyze', async (req, res) => {
     try {
         const { url } = req.body;

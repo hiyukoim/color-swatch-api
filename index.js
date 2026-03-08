@@ -3,10 +3,11 @@ const cors = require('cors');
 const { Vibrant } = require('node-vibrant/node');
 const app = express();
 
-// Allow origins defined in ALLOWED_ORIGINS env var (comma-separated)
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-    : [];
+// Allow origins defined in ALLOWED_ORIGINS env var (comma-separated, or * to allow all)
+const rawOrigins = process.env.ALLOWED_ORIGINS;
+const allowedOrigins = rawOrigins === '*'
+    ? '*'
+    : rawOrigins ? rawOrigins.split(',').map(o => o.trim()) : [];
 app.use(cors({ origin: allowedOrigins }));
 
 app.use(express.json());

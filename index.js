@@ -16,27 +16,45 @@ app.get('/', (req, res) => {
     res.redirect('https://vibrant.dev/');
 });
 
+async function extractPalette(url) {
+    const palette = await Vibrant.from(url).getPalette();
+    const swatchNames = ['Vibrant', 'Muted', 'DarkVibrant', 'DarkMuted', 'LightVibrant', 'LightMuted'];
+    const result = {};
+    for (const name of swatchNames) {
+        const swatch = palette[name];
+        result[name] = swatch ? {
+            hex: swatch.hex,
+            rgb: swatch.rgb,
+            hsl: swatch.hsl,
+            population: swatch.population,
+            titleTextColor: swatch.titleTextColor,
+            bodyTextColor: swatch.bodyTextColor
+        } : null;
+    }
+    return result;
+}
+
+app.get('/api/analyze', async (req, res) => {
+    try {
+        const url = req.query.url;
+        if (!url) {
+            return res.status(400).json({ error: "Image URL is required. Usage: /api/analyze?url=https://example.com/image.jpg" });
+        }
+        const result = await extractPalette(url);
+        res.json(result);
+    } catch (error) {
+        console.error("Color extraction failed:", error);
+        res.status(500).json({ error: "Internal server error during color extraction." });
+    }
+});
+
 app.post('/api/analyze', async (req, res) => {
     try {
         const { url } = req.body;
         if (!url) {
             return res.status(400).json({ error: "Image URL is required." });
         }
-        const palette = await Vibrant.from(url).getPalette();
-        // Extract all available properties from each swatch
-        const swatchNames = ['Vibrant', 'Muted', 'DarkVibrant', 'DarkMuted', 'LightVibrant', 'LightMuted'];
-        const result = {};
-        for (const name of swatchNames) {
-            const swatch = palette[name];
-            result[name] = swatch ? {
-                hex: swatch.hex,
-                rgb: swatch.rgb,
-                hsl: swatch.hsl,
-                population: swatch.population,
-                titleTextColor: swatch.titleTextColor,
-                bodyTextColor: swatch.bodyTextColor
-            } : null;
-        }
+        const result = await extractPalette(url);
         res.json(result);
     } catch (error) {
         console.error("Color extraction failed:", error);
